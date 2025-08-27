@@ -30,3 +30,18 @@ Notes
 Troubleshooting
 - 404 on project site: ensure `basePath` is set correctly and that files were deployed to `gh-pages` branch.
 - Build errors: run `npm run build` and inspect logs; if typescript or image-related errors block export, we can patch them.
+
+Contact form (static sites)
+
+If your site includes a contact form (this project does), static sites need an external form receiver. Two free options:
+
+- Formspree: https://formspree.io — create a form endpoint, they'll give you a URL that accepts POST JSON.
+- Getform: https://getform.io — similar workflow.
+
+After creating an endpoint, set the URL in an environment variable named `NEXT_PUBLIC_CONTACT_ENDPOINT`.
+
+For local testing, create a `.env.local` with:
+
+NEXT_PUBLIC_CONTACT_ENDPOINT=https://formspree.io/f/xxxxxxx
+
+Then rebuild/export and deploy as above.

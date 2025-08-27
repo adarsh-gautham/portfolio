@@ -1,12 +1,21 @@
 
-'use client';
+ 'use client';
 import { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { sendEmail, type SendEmailInput } from '@/ai/flows/send-email-flow';
+
+// Client-side contact submission uses an external form endpoint.
+// Configure NEXT_PUBLIC_CONTACT_ENDPOINT to point to your form receiver (Formspree/Getform/etc.).
+type SendEmailInput = {
+  fullName: string;
+  company?: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 export const ContactSection = () => {
   const ref = useRef<HTMLElement>(null);
@@ -31,7 +40,21 @@ export const ContactSection = () => {
     setIsSubmitting(true);
     setSubmitStatus(null);
     try {
-      await sendEmail(formData);
+      const endpoint = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
+      if (!endpoint) {
+        console.error('No contact endpoint configured. Set NEXT_PUBLIC_CONTACT_ENDPOINT.');
+        setSubmitStatus('error');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       setSubmitStatus('success');
       setFormData({
         fullName: '',
